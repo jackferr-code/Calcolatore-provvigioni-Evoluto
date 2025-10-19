@@ -1,0 +1,1210 @@
+import React, { useState } from 'react';
+import { Calculator } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+
+const CalcolatoreComparativo = () => {
+  const [totaliMensili, setTotaliMensili] = useState({
+    pagine: 0,
+    prioritarie: 0,
+    raccomandate: 0
+  });
+
+  const [costiImprenditore, setCostiImprenditore] = useState({
+    costoCarta: 0.0073,
+    costoStampaFacciata: 0.006,
+    costoBusta: 0.05,
+    costoStampaBusta: 0.07,
+    costoCartaAvvisoRicevimento: 0.0672,
+    costoStampaAvvisoRicevimento: 0.018,
+    costoOrarioDipendente: 15,
+    tempoImbustamentoSecondi: 30,
+    feePagina: 0.02,
+    feeBusta: 0.10,
+    fogliExtraPerBusta: 1.5,
+    fronteRetro: true
+  });
+
+  const [presetProvvigioni, setPresetProvvigioni] = useState({
+    preset203: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 },
+    preset204: { pagine: 0.025, prioritarie: 0.050, raccomandate: 0.250 },
+    preset205: { pagine: 0.050, prioritarie: 0.050, raccomandate: 0.250 }
+  });
+
+  const formatNumber = (num) => {
+    return new Intl.NumberFormat('it-IT', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(num);
+  };
+
+  const [listiniAgente, setListiniAgente] = useState([
+    {
+      codice: '101',
+      busta: 0.20,
+      pagina: 0.08,
+      clienti: { pagine: 0.000, prioritarie: 0.000, raccomandate: 0.000 },
+      distributori: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 }
+    },
+    {
+      codice: '111',
+      busta: 0.20,
+      pagina: 0.08,
+      clienti: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 },
+      distributori: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 }
+    },
+    {
+      codice: '102',
+      busta: 0.25,
+      pagina: 0.10,
+      clienti: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 },
+      distributori: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.500 }
+    },
+    {
+      codice: '112',
+      busta: 0.25,
+      pagina: 0.10,
+      clienti: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.500 },
+      distributori: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 }
+    },
+    {
+      codice: '103',
+      busta: 0.25,
+      pagina: 0.15,
+      clienti: { pagine: 0.025, prioritarie: 0.050, raccomandate: 0.250 },
+      distributori: { pagine: 0.015, prioritarie: 0.050, raccomandate: 0.500 }
+    },
+    {
+      codice: '113',
+      busta: 0.25,
+      pagina: 0.15,
+      clienti: { pagine: 0.025, prioritarie: 0.050, raccomandate: 0.500 },
+      distributori: { pagine: 0.010, prioritarie: 0.050, raccomandate: 0.250 }
+    },
+    {
+      codice: '123',
+      busta: 0.25,
+      pagina: 0.15,
+      clienti: { pagine: 0.025, prioritarie: 0.050, raccomandate: 1.000 },
+      distributori: { pagine: 0.005, prioritarie: 0.050, raccomandate: 0.000 }
+    },
+    {
+      codice: '104',
+      busta: 0.25,
+      pagina: 0.20,
+      clienti: { pagine: 0.050, prioritarie: 0.050, raccomandate: 0.250 },
+      distributori: { pagine: 0.025, prioritarie: 0.050, raccomandate: 0.500 }
+    },
+    {
+      codice: '114',
+      busta: 0.25,
+      pagina: 0.20,
+      clienti: { pagine: 0.050, prioritarie: 0.050, raccomandate: 0.500 },
+      distributori: { pagine: 0.020, prioritarie: 0.050, raccomandate: 0.250 }
+    },
+    {
+      codice: '124',
+      busta: 0.25,
+      pagina: 0.20,
+      clienti: { pagine: 0.050, prioritarie: 0.050, raccomandate: 1.000 },
+      distributori: { pagine: 0.015, prioritarie: 0.050, raccomandate: 0.000 }
+    },
+    {
+      codice: '105',
+      busta: 0.25,
+      pagina: 0.25,
+      clienti: { pagine: 0.075, prioritarie: 0.050, raccomandate: 0.250 },
+      distributori: { pagine: 0.040, prioritarie: 0.050, raccomandate: 0.500 }
+    },
+    {
+      codice: '115',
+      busta: 0.25,
+      pagina: 0.25,
+      clienti: { pagine: 0.075, prioritarie: 0.050, raccomandate: 0.500 },
+      distributori: { pagine: 0.035, prioritarie: 0.050, raccomandate: 0.250 }
+    },
+    {
+      codice: '125',
+      busta: 0.25,
+      pagina: 0.25,
+      clienti: { pagine: 0.075, prioritarie: 0.050, raccomandate: 1.000 },
+      distributori: { pagine: 0.030, prioritarie: 0.050, raccomandate: 0.000 }
+    }
+  ]);
+
+  const [listiniImprenditore, setListiniImprenditore] = useState([
+    {
+      codice: '101',
+      busta: 0.20,
+      pagina: 0.08,
+      clienti: { pagine: 0.000, prioritarie: 0.000, raccomandate: 0.000 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '111',
+      busta: 0.20,
+      pagina: 0.08,
+      clienti: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '102',
+      busta: 0.25,
+      pagina: 0.10,
+      clienti: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.250 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '112',
+      busta: 0.25,
+      pagina: 0.10,
+      clienti: { pagine: 0.000, prioritarie: 0.050, raccomandate: 0.500 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '103',
+      busta: 0.25,
+      pagina: 0.15,
+      clienti: { pagine: 0.025, prioritarie: 0.050, raccomandate: 0.250 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '113',
+      busta: 0.25,
+      pagina: 0.15,
+      clienti: { pagine: 0.025, prioritarie: 0.050, raccomandate: 0.500 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '123',
+      busta: 0.25,
+      pagina: 0.15,
+      clienti: { pagine: 0.025, prioritarie: 0.050, raccomandate: 1.000 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '104',
+      busta: 0.25,
+      pagina: 0.20,
+      clienti: { pagine: 0.050, prioritarie: 0.050, raccomandate: 0.250 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '114',
+      busta: 0.25,
+      pagina: 0.20,
+      clienti: { pagine: 0.050, prioritarie: 0.050, raccomandate: 0.500 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '124',
+      busta: 0.25,
+      pagina: 0.20,
+      clienti: { pagine: 0.050, prioritarie: 0.050, raccomandate: 1.000 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '105',
+      busta: 0.25,
+      pagina: 0.25,
+      clienti: { pagine: 0.075, prioritarie: 0.050, raccomandate: 0.250 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '115',
+      busta: 0.25,
+      pagina: 0.25,
+      clienti: { pagine: 0.075, prioritarie: 0.050, raccomandate: 0.500 },
+      calcolaProvvigioniClienti: true
+    },
+    {
+      codice: '125',
+      busta: 0.25,
+      pagina: 0.25,
+      clienti: { pagine: 0.075, prioritarie: 0.050, raccomandate: 1.000 },
+      calcolaProvvigioniClienti: true
+    }
+  ]);
+
+  const handleInputChange = (field, value) => {
+    setTotaliMensili(prev => ({
+      ...prev,
+      [field]: parseFloat(value) || 0
+    }));
+  };
+
+  const handleListinoAgenteChange = (index, field, subfield, value) => {
+    const newListini = [...listiniAgente];
+    if (subfield) {
+      newListini[index][field][subfield] = parseFloat(value) || 0;
+    } else {
+      newListini[index][field] = parseFloat(value) || 0;
+    }
+    setListiniAgente(newListini);
+  };
+
+  const handleListinoImprenditoreChange = (index, field, subfield, value) => {
+    const newListini = [...listiniImprenditore];
+    if (subfield) {
+      newListini[index][field][subfield] = parseFloat(value) || 0;
+    } else if (field === 'calcolaProvvigioniClienti') {
+      newListini[index][field] = value;
+    } else {
+      newListini[index][field] = parseFloat(value) || 0;
+    }
+    setListiniImprenditore(newListini);
+  };
+
+  const handleCostiChange = (field, value) => {
+    if (field === 'fronteRetro') {
+      setCostiImprenditore(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else {
+      setCostiImprenditore(prev => ({
+        ...prev,
+        [field]: parseFloat(value) || 0
+      }));
+    }
+  };
+
+  const handlePresetChange = (preset, field, value) => {
+    setPresetProvvigioni(prev => ({
+      ...prev,
+      [preset]: {
+        ...prev[preset],
+        [field]: parseFloat(value) || 0
+      }
+    }));
+  };
+
+  const applicaPresetProvvigioni = (index, preset) => {
+    const valoriPreset = presetProvvigioni[preset];
+    const newListini = [...listiniImprenditore];
+    newListini[index].clienti = {
+      pagine: valoriPreset.pagine,
+      prioritarie: valoriPreset.prioritarie,
+      raccomandate: valoriPreset.raccomandate
+    };
+    setListiniImprenditore(newListini);
+  };
+
+  const calcolaTotaleVenditaAgente = (listino) => {
+    const totalePagine = totaliMensili.pagine * listino.pagina;
+    const totaleBuste = (totaliMensili.prioritarie + totaliMensili.raccomandate) * listino.busta;
+    return totalePagine + totaleBuste;
+  };
+
+  const calcolaProvvigioniDistributori = (listino) => {
+    return (
+      totaliMensili.pagine * listino.distributori.pagine +
+      totaliMensili.prioritarie * listino.distributori.prioritarie +
+      totaliMensili.raccomandate * listino.distributori.raccomandate
+    );
+  };
+
+  const calcolaTotaleVenditaImprenditore = (listino) => {
+    const totalePagine = totaliMensili.pagine * listino.pagina;
+    const totaleBuste = (totaliMensili.prioritarie + totaliMensili.raccomandate) * listino.busta;
+    return totalePagine + totaleBuste;
+  };
+
+  const calcolaProvvigioniClienti = (listino) => {
+    return (
+      totaliMensili.pagine * listino.clienti.pagine +
+      totaliMensili.prioritarie * listino.clienti.prioritarie +
+      totaliMensili.raccomandate * listino.clienti.raccomandate
+    );
+  };
+
+  const calcolaCostiImprenditore = (listino) => {
+    const totaleBuste = totaliMensili.prioritarie + totaliMensili.raccomandate;
+    
+    const feePagine = totaliMensili.pagine * costiImprenditore.feePagina;
+    const feeBuste = totaleBuste * costiImprenditore.feeBusta;
+    const totaleFee = feePagine + feeBuste;
+
+    const costoCartaPagine = costiImprenditore.fronteRetro 
+      ? (totaliMensili.pagine / 2) * costiImprenditore.costoCarta
+      : totaliMensili.pagine * costiImprenditore.costoCarta;
+
+    const costoStampaPagine = totaliMensili.pagine * costiImprenditore.costoStampaFacciata;
+
+    const fogliExtra = totaleBuste * costiImprenditore.fogliExtraPerBusta;
+    const costoCartaFogliExtra = fogliExtra * costiImprenditore.costoCarta;
+    const costoStampaFogliExtra = fogliExtra * costiImprenditore.costoStampaFacciata;
+
+    const costoBuste = totaleBuste * costiImprenditore.costoBusta;
+    const costoStampaBuste = totaleBuste * costiImprenditore.costoStampaBusta;
+
+    const costoAvvisiRicevimento = totaliMensili.raccomandate * 
+      (costiImprenditore.costoCartaAvvisoRicevimento + costiImprenditore.costoStampaAvvisoRicevimento);
+
+    const costiSoggettiIVA = totaleFee + costoCartaPagine + costoStampaPagine + 
+      costoCartaFogliExtra + costoStampaFogliExtra + costoBuste + costoStampaBuste + 
+      costoAvvisiRicevimento;
+
+    const iva = costiSoggettiIVA * 0.22;
+
+    const tempoOre = (totaleBuste * costiImprenditore.tempoImbustamentoSecondi) / 3600;
+    const costoManodopera = tempoOre * costiImprenditore.costoOrarioDipendente;
+
+    const provvigioniClienti = listino.calcolaProvvigioniClienti 
+      ? calcolaProvvigioniClienti(listino) 
+      : 0;
+
+    const totaleCostiVariabili = costoCartaPagine + costoStampaPagine + 
+      costoCartaFogliExtra + costoStampaFogliExtra + costoBuste + costoStampaBuste +
+      costoAvvisiRicevimento + costoManodopera;
+
+    const totaleCosti = totaleFee + totaleCostiVariabili + iva + provvigioniClienti;
+
+    return {
+      fee: totaleFee,
+      costiVariabili: totaleCostiVariabili,
+      iva: iva,
+      provvigioniClienti,
+      totaleCosti,
+      dettaglio: {
+        feePagine,
+        feeBuste,
+        costoCartaPagine,
+        costoStampaPagine,
+        costoCartaFogliExtra,
+        costoStampaFogliExtra,
+        costoBuste,
+        costoStampaBuste,
+        costoAvvisiRicevimento,
+        costoManodopera
+      }
+    };
+  };
+
+  const totaleBuste = totaliMensili.prioritarie + totaliMensili.raccomandate;
+  const percPrioritarie = totaleBuste > 0 ? (totaliMensili.prioritarie / totaleBuste * 100) : 0;
+  const percRaccomandate = totaleBuste > 0 ? (totaliMensili.raccomandate / totaleBuste * 100) : 0;
+  const mediaPagineBusta = totaleBuste > 0 ? (totaliMensili.pagine / totaleBuste) : 0;
+
+  const datiGrafico = listiniAgente.map((listinoAg, index) => {
+    const listinoImpr = listiniImprenditore[index];
+    const provvAgente = calcolaProvvigioniDistributori(listinoAg);
+    const venditaImpr = calcolaTotaleVenditaImprenditore(listinoImpr);
+    const costiImpr = calcolaCostiImprenditore(listinoImpr);
+    const margImpr = venditaImpr - costiImpr.totaleCosti;
+
+    return {
+      listino: listinoAg.codice,
+      'Margine Agente': parseFloat(provvAgente.toFixed(2)),
+      'Margine Imprenditore': parseFloat(margImpr.toFixed(2))
+    };
+  });
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Calculator className="w-8 h-8 text-blue-600" />
+          <h1 className="text-2xl font-bold text-gray-800">
+            Calcolatore Comparativo: Agente vs Imprenditore
+          </h1>
+        </div>
+        <p className="text-gray-600">Confronta la marginalità tra modalità Agente e Imprenditore</p>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-xl p-6 mb-6">
+        <h2 className="text-2xl font-bold text-white mb-4">📊 Inserisci Totali Mensili</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label className="block text-white font-semibold mb-2">✉️ Totale Prioritarie</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              className="w-full p-3 rounded-lg text-lg font-semibold"
+              onChange={(e) => handleInputChange('prioritarie', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-white font-semibold mb-2">📮 Totale Raccomandate</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              className="w-full p-3 rounded-lg text-lg font-semibold"
+              onChange={(e) => handleInputChange('raccomandate', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-white font-semibold mb-2">📄 Totale Pagine Stampate</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              className="w-full p-3 rounded-lg text-lg font-semibold"
+              onChange={(e) => handleInputChange('pagine', e.target.value)}
+            />
+          </div>
+        </div>
+
+        {(totaliMensili.pagine > 0 || totaliMensili.prioritarie > 0 || totaliMensili.raccomandate > 0) && (
+          <div className="bg-white bg-opacity-20 backdrop-blur rounded-lg p-3 mt-3">
+            <div className="text-white text-sm font-semibold mb-2">📈 Analisi Mix Prodotti</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-white text-sm">
+              <div className="bg-white bg-opacity-10 rounded p-2">
+                <div className="text-xs opacity-90">% Prioritarie</div>
+                <div className="text-lg font-bold">{percPrioritarie.toFixed(1)}%</div>
+              </div>
+              <div className="bg-white bg-opacity-10 rounded p-2">
+                <div className="text-xs opacity-90">% Raccomandate</div>
+                <div className="text-lg font-bold">{percRaccomandate.toFixed(1)}%</div>
+              </div>
+              <div className="bg-white bg-opacity-10 rounded p-2">
+                <div className="text-xs opacity-90">Media Pagine/Busta</div>
+                <div className="text-lg font-bold">{mediaPagineBusta.toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-xl p-6 mb-6">
+        <h2 className="text-2xl font-bold text-white mb-4">💼 Costi Modalità Imprenditore</h2>
+        
+        <div className="mb-4">
+          <h3 className="text-white font-semibold mb-3 text-lg">📋 Fee e Sistema</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Fee Pagina (€)</label>
+              <input
+                type="number"
+                step="0.0001"
+                min="0"
+                defaultValue="0.02"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('feePagina', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Fee Busta (€)</label>
+              <input
+                type="number"
+                step="0.001"
+                min="0"
+                defaultValue="0.10"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('feeBusta', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Fogli Extra per Busta</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                defaultValue="1.5"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('fogliExtraPerBusta', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <h3 className="text-white font-semibold mb-3 text-lg">📦 Costi Materiali</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Carta (€/foglio)</label>
+              <input
+                type="number"
+                step="0.0001"
+                min="0"
+                defaultValue="0.0073"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoCarta', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Stampa (€/facciata)</label>
+              <input
+                type="number"
+                step="0.001"
+                min="0"
+                defaultValue="0.006"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoStampaFacciata', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Medio Busta (€)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue="0.05"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoBusta', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Stampa Busta (€)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue="0.07"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoStampaBusta', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Carta AR (€)</label>
+              <input
+                type="number"
+                step="0.0001"
+                min="0"
+                defaultValue="0.0672"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoCartaAvvisoRicevimento', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Stampa AR (€)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue="0.018"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoStampaAvvisoRicevimento', e.target.value)}
+              />
+              <div className="text-xs text-white opacity-75 mt-1">IVA esclusa</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <h3 className="text-white font-semibold mb-3 text-lg">👷 Manodopera e Configurazione</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Costo Orario Dip. (€/h)</label>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                defaultValue="15"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('costoOrarioDipendente', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Tempo Imbustamento (sec)</label>
+              <input
+                type="number"
+                min="0"
+                defaultValue="30"
+                className="w-full p-2 rounded-lg"
+                onChange={(e) => handleCostiChange('tempoImbustamentoSecondi', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Stampa Fronte/Retro</label>
+              <div className="flex items-center h-10 bg-white rounded-lg px-3">
+                <input
+                  type="checkbox"
+                  defaultChecked={true}
+                  className="w-5 h-5"
+                  onChange={(e) => handleCostiChange('fronteRetro', e.target.checked)}
+                />
+                <span className="ml-2 text-gray-800 font-semibold">Attivo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <h3 className="text-white font-semibold mb-3 text-lg">🎯 Preset Provvigioni Clienti</h3>
+          <div className="bg-white bg-opacity-10 p-4 rounded-lg">
+            <p className="text-white text-xs mb-3 opacity-90">
+              Configura i tuoi preset di provvigioni e applicali rapidamente a qualsiasi listino imprenditore con un click
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white p-3 rounded-lg">
+                <div className="font-bold text-purple-700 mb-2 text-sm">📋 Listino Provvigioni 203</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-700">Pagine (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset203.pagine}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset203', 'pagine', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700">Prioritarie (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset203.prioritarie}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset203', 'prioritarie', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700">Raccomandate (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset203.raccomandate}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset203', 'raccomandate', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-3 rounded-lg">
+                <div className="font-bold text-purple-700 mb-2 text-sm">📋 Listino Provvigioni 204</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-700">Pagine (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset204.pagine}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset204', 'pagine', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700">Prioritarie (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset204.prioritarie}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset204', 'prioritarie', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700">Raccomandate (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset204.raccomandate}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset204', 'raccomandate', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-3 rounded-lg">
+                <div className="font-bold text-purple-700 mb-2 text-sm">📋 Listino Provvigioni 205</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-700">Pagine (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset205.pagine}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset205', 'pagine', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700">Prioritarie (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset205.prioritarie}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset205', 'prioritarie', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-700">Raccomandate (€)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={presetProvvigioni.preset205.raccomandate}
+                      className="w-full p-1 text-xs border rounded"
+                      onChange={(e) => handlePresetChange('preset205', 'raccomandate', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 text-xs text-white bg-white bg-opacity-20 p-3 rounded">
+          <strong>Note:</strong> Tutti i costi sono IVA ESCLUSA. L'IVA (22%) viene calcolata automaticamente e mostrata nel dettaglio. 
+          I fogli extra per busta sono calcolati come: fogliExtra × costo carta + fogliExtra × costo stampa. 
+          AR = Avviso Ricevimento (solo per raccomandate). Manodopera e provvigioni clienti non sono soggetti ad IVA.
+          <br/><strong>💡 Preset Provvigioni:</strong> Configura i listini 203, 204 e 205 con i tuoi valori standard, poi applicali velocemente a qualsiasi listino imprenditore. 
+          Puoi modificare i preset in qualsiasi momento e attivare/disattivare il calcolo delle provvigioni per ogni singolo listino.
+        </div>
+      </div>
+
+      {(totaliMensili.pagine > 0 || totaliMensili.prioritarie > 0 || totaliMensili.raccomandate > 0) && (
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">📊 Grafico Comparativo Marginalità</h2>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart
+                data={datiGrafico}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="listino" 
+                  label={{ value: 'Listini', position: 'insideBottom', offset: -5 }}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis 
+                  label={{ value: 'Margine (€)', angle: -90, position: 'insideLeft' }}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip 
+                  formatter={(value) => `€${formatNumber(value)}`}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '20px' }}
+                  iconType="rect"
+                />
+                <ReferenceLine y={0} stroke="#000" strokeWidth={1.5} />
+                <Bar 
+                  dataKey="Margine Agente" 
+                  fill="#3B82F6" 
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={60}
+                />
+                <Bar 
+                  dataKey="Margine Imprenditore" 
+                  fill="#9333EA" 
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={60}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+            <p className="text-sm text-gray-700">
+              <strong>💡 Come leggere il grafico:</strong> Le barre blu mostrano il margine come Agente, 
+              le barre viola come Imprenditore. Più alta la barra viola rispetto alla blu, più conviene la modalità Imprenditore per quel listino.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">⚖️ Confronto Marginalità per Listino</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-xs">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <th className="border p-2 text-left" rowSpan="2">Listino</th>
+                <th className="border p-2 text-center bg-blue-700" colSpan="3">🤝 MODALITÀ AGENTE</th>
+                <th className="border p-2 text-center bg-purple-700" colSpan="5">💼 MODALITÀ IMPRENDITORE</th>
+                <th className="border p-2 text-center bg-green-700" colSpan="2">📊 CONFRONTO</th>
+              </tr>
+              <tr className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <th className="border p-2 text-right bg-blue-700">Vendita</th>
+                <th className="border p-2 text-right bg-blue-700">Provv.Cli</th>
+                <th className="border p-2 text-right bg-blue-700">Marg. €</th>
+                <th className="border p-2 text-right bg-purple-700">Vendita</th>
+                <th className="border p-2 text-right bg-purple-700">Fee</th>
+                <th className="border p-2 text-right bg-purple-700">Costi+IVA</th>
+                <th className="border p-2 text-right bg-purple-700">Provv.Cli</th>
+                <th className="border p-2 text-right bg-purple-700">Marg. €</th>
+                <th className="border p-2 text-right bg-green-700">Diff. €</th>
+                <th className="border p-2 text-center bg-green-700">Migliore</th>
+              </tr>
+            </thead>
+            <tbody>
+              {listiniAgente.map((listinoAg, index) => {
+                const listinoImpr = listiniImprenditore[index];
+                
+                const venditaAg = calcolaTotaleVenditaAgente(listinoAg);
+                const provvClientiAg = calcolaProvvigioniClienti(listinoAg);
+                const provvAgente = calcolaProvvigioniDistributori(listinoAg);
+                const margAgente = provvAgente;
+
+                const venditaImpr = calcolaTotaleVenditaImprenditore(listinoImpr);
+                const costiImpr = calcolaCostiImprenditore(listinoImpr);
+                const margImpr = venditaImpr - costiImpr.totaleCosti;
+
+                const differenza = margImpr - margAgente;
+                const migliore = differenza > 0 ? 'IMPRENDITORE' : differenza < 0 ? 'AGENTE' : 'PARI';
+
+                return (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <td className="border p-2 font-bold text-blue-700">{listinoAg.codice}</td>
+                    
+                    <td className="border p-2 text-right text-purple-700">€{formatNumber(venditaAg)}</td>
+                    <td className="border p-2 text-right text-gray-600">€{formatNumber(provvClientiAg)}</td>
+                    <td className="border p-2 text-right font-bold text-blue-700">€{formatNumber(margAgente)}</td>
+                    
+                    <td className="border p-2 text-right text-purple-700">€{formatNumber(venditaImpr)}</td>
+                    <td className="border p-2 text-right text-red-600">€{formatNumber(costiImpr.fee)}</td>
+                    <td className="border p-2 text-right text-orange-700">€{formatNumber(costiImpr.costiVariabili + costiImpr.iva)}</td>
+                    <td className="border p-2 text-right text-gray-600">
+                      {listinoImpr.calcolaProvvigioniClienti 
+                        ? `€${formatNumber(costiImpr.provvigioniClienti)}` 
+                        : <span className="text-gray-400">€0,00</span>
+                      }
+                    </td>
+                    <td className="border p-2 text-right font-bold text-purple-700">€{formatNumber(margImpr)}</td>
+                    
+                    <td className={`border p-2 text-right font-bold ${differenza >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {differenza >= 0 ? '+' : ''}€{formatNumber(differenza)}
+                    </td>
+                    <td className="border p-2 text-center font-bold">
+                      {migliore === 'IMPRENDITORE' && <span className="text-purple-700">💼 IMPR</span>}
+                      {migliore === 'AGENTE' && <span className="text-blue-700">🤝 AGE</span>}
+                      {migliore === 'PARI' && <span className="text-gray-600">⚖️ PARI</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+          <h3 className="font-bold text-gray-800 mb-2">📌 Legenda:</h3>
+          <div className="text-sm text-gray-700 space-y-1">
+            <p><strong>Agente:</strong> Ricevi le provvigioni distributori. Le provvigioni clienti sono mostrate solo per riferimento.</p>
+            <p><strong>Imprenditore:</strong> Incassi il totale vendita ma paghi fee, costi variabili, IVA e provvigioni clienti</p>
+            <p><strong>Diff. €:</strong> Quanto guadagni in più come Imprenditore rispetto ad Agente</p>
+            <p className="text-green-700 font-semibold">Verde = Imprenditore conviene | <span className="text-red-600">Rosso = Agente conviene</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">⚙️ Configura Listini e Dettagli Calcoli</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {listiniAgente.map((listinoAg, index) => {
+            const listinoImpr = listiniImprenditore[index];
+            
+            const venditaAg = calcolaTotaleVenditaAgente(listinoAg);
+            const provvAgente = calcolaProvvigioniDistributori(listinoAg);
+            
+            const venditaImpr = calcolaTotaleVenditaImprenditore(listinoImpr);
+            const provvClienti = calcolaProvvigioniClienti(listinoImpr);
+            const costiImpr = calcolaCostiImprenditore(listinoImpr);
+            const margImpr = venditaImpr - costiImpr.totaleCosti;
+
+            return (
+              <div key={index} className="border-2 border-gray-200 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-lg mb-4">
+                  <h3 className="text-lg font-bold">Listino {listinoAg.codice}</h3>
+                </div>
+
+                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3 mb-4">
+                  <div className="font-bold text-blue-900 mb-3 text-center">🤝 MODALITÀ AGENTE</div>
+                  
+                  <div className="bg-white p-2 rounded mb-2">
+                    <div className="font-semibold text-blue-800 text-sm mb-1">💰 Prezzi di Vendita</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>Busta: €{listinoAg.busta.toFixed(2)}</div>
+                      <div>Pagina: €{listinoAg.pagina.toFixed(2)}</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-2 rounded mb-2">
+                    <div className="font-semibold text-green-800 text-sm mb-2">👥 Provvigioni Clienti (modificabili)</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-700">Pagine</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoAg.clienti.pagine}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoAgenteChange(index, 'clienti', 'pagine', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Prioritarie</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoAg.clienti.prioritarie}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoAgenteChange(index, 'clienti', 'prioritarie', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Raccomandate</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoAg.clienti.raccomandate}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoAgenteChange(index, 'clienti', 'raccomandate', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-2 rounded mb-2">
+                    <div className="font-semibold text-green-800 text-sm mb-2">🏢 Provvigioni Distributori (modificabili)</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-700">Pagine</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoAg.distributori.pagine}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoAgenteChange(index, 'distributori', 'pagine', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Prioritarie</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoAg.distributori.prioritarie}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoAgenteChange(index, 'distributori', 'prioritarie', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Raccomandate</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoAg.distributori.raccomandate}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoAgenteChange(index, 'distributori', 'raccomandate', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-100 p-2 rounded">
+                    <div className="font-semibold text-blue-900 text-sm mb-1">📊 Dettaglio</div>
+                    <div className="text-xs space-y-1">
+                      <div className="flex justify-between">
+                        <span>Totale Vendita:</span>
+                        <span className="font-bold">€{formatNumber(venditaAg)}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-600">
+                        <span>Provvigioni Clienti:</span>
+                        <span className="font-semibold">€{formatNumber(calcolaProvvigioniClienti(listinoAg))}</span>
+                      </div>
+                      <div className="flex justify-between text-green-700">
+                        <span>Provvigioni Distributori:</span>
+                        <span className="font-bold">€{formatNumber(provvAgente)}</span>
+                      </div>
+                      <div className="border-t border-blue-300 pt-1 flex justify-between font-bold text-blue-900">
+                        <span>MARGINE NETTO:</span>
+                        <span>€{formatNumber(provvAgente)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-3">
+                  <div className="font-bold text-purple-900 mb-3 text-center">💼 MODALITÀ IMPRENDITORE</div>
+                  
+                  <div className="bg-white p-2 rounded mb-2">
+                    <div className="font-semibold text-purple-800 text-sm mb-2">💰 Prezzi di Vendita (modificabili)</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-700">Busta (€)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={listinoImpr.busta}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoImprenditoreChange(index, 'busta', null, e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Pagina (€)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={listinoImpr.pagina}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoImprenditoreChange(index, 'pagina', null, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-2 rounded mb-2">
+                    <div className="font-semibold text-green-800 text-sm mb-2">👥 Provvigioni Clienti</div>
+                    <div className="grid grid-cols-3 gap-2 mb-2">
+                      <div>
+                        <label className="text-xs text-gray-700">Pagine</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoImpr.clienti.pagine}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoImprenditoreChange(index, 'clienti', 'pagine', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Prioritarie</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoImpr.clienti.prioritarie}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoImprenditoreChange(index, 'clienti', 'prioritarie', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-700">Raccomandate</label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          value={listinoImpr.clienti.raccomandate}
+                          className="w-full p-1 text-xs border rounded"
+                          onChange={(e) => handleListinoImprenditoreChange(index, 'clienti', 'raccomandate', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2 mb-2">
+                      <button
+                        onClick={() => applicaPresetProvvigioni(index, 'preset203')}
+                        className="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-semibold py-2 px-2 rounded hover:from-green-600 hover:to-green-700 transition-all shadow-sm"
+                      >
+                        🎯 Listino 203
+                      </button>
+                      <button
+                        onClick={() => applicaPresetProvvigioni(index, 'preset204')}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold py-2 px-2 rounded hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm"
+                      >
+                        🎯 Listino 204
+                      </button>
+                      <button
+                        onClick={() => applicaPresetProvvigioni(index, 'preset205')}
+                        className="bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-semibold py-2 px-2 rounded hover:from-purple-600 hover:to-purple-700 transition-all shadow-sm"
+                      >
+                        🎯 Listino 205
+                      </button>
+                    </div>
+
+                    <div 
+                      className="flex items-center bg-gray-50 p-2 rounded border-2 border-green-300 cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleListinoImprenditoreChange(index, 'calcolaProvvigioniClienti', null, !listinoImpr.calcolaProvvigioniClienti)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={listinoImpr.calcolaProvvigioniClienti}
+                        className="w-4 h-4 cursor-pointer"
+                        readOnly
+                      />
+                      <span className="ml-2 text-xs font-semibold text-gray-700 select-none">
+                        ✓ Calcola provvigioni clienti per questo listino
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-100 p-2 rounded">
+                    <div className="font-semibold text-purple-900 text-sm mb-1">📊 Dettaglio Costi</div>
+                    <div className="text-xs space-y-1">
+                      <div className="flex justify-between">
+                        <span>Totale Vendita:</span>
+                        <span className="font-bold">€{formatNumber(venditaImpr)}</span>
+                      </div>
+                      <div className="text-red-700 border-t border-purple-300 pt-1 mt-1">
+                        <div className="font-semibold mb-1">COSTI:</div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Fee Pagine:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.feePagine)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Fee Buste:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.feeBuste)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Carta Pagine:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoCartaPagine)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Stampa Pagine:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoStampaPagine)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Carta Fogli Extra:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoCartaFogliExtra)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Stampa Fogli Extra:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoStampaFogliExtra)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Buste (materiale):</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoBuste)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Stampa Buste:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoStampaBuste)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Avvisi Ricevimento:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoAvvisiRicevimento)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 text-xs">
+                          <span>• Manodopera:</span>
+                          <span>€{formatNumber(costiImpr.dettaglio.costoManodopera)}</span>
+                        </div>
+                        <div className="flex justify-between pl-2 font-semibold text-xs">
+                          <span>• Provvigioni Clienti:</span>
+                          <span>
+                            {listinoImpr.calcolaProvvigioniClienti 
+                              ? `€${formatNumber(provvClienti)}` 
+                              : <span className="text-gray-500">€0,00 (disattivate)</span>
+                            }
+                          </span>
+                        </div>
+                        <div className="flex justify-between pl-2 font-bold text-xs text-yellow-600 bg-yellow-100 py-1 px-2 rounded mt-1">
+                          <span>• IVA (22%):</span>
+                          <span>€{formatNumber(costiImpr.iva)}</span>
+                        </div>
+                      </div>
+                      <div className="border-t border-purple-300 pt-1 flex justify-between font-bold">
+                        <span>Totale Costi:</span>
+                        <span className="text-red-700">€{formatNumber(costiImpr.totaleCosti)}</span>
+                      </div>
+                      <div className="border-t border-purple-300 pt-1 flex justify-between font-bold text-purple-900">
+                        <span>MARGINE NETTO:</span>
+                        <span className={margImpr >= 0 ? 'text-green-700' : 'text-red-700'}>
+                          €{formatNumber(margImpr)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CalcolatoreComparativo;
